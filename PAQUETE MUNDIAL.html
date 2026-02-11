@@ -1,0 +1,982 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Paquetes Mundial en Twitch — Colombia, Argentina, Perú y Chile</title>
+  <style>
+    :root{
+      --bg:#0b0d12;
+      --panel:rgba(18,22,32,.78);
+      --panel2:rgba(18,22,32,.62);
+      --stroke:rgba(255,255,255,.12);
+      --text:#f3f6ff;
+      --muted:rgba(243,246,255,.72);
+      --twitch:#9146FF;
+      --good:#41d19a;
+      --warn:#ffcf5a;
+      --bad:#ff6b6b;
+      --shadow: 0 10px 30px rgba(0,0,0,.45);
+      --radius: 18px;
+      --radius2: 14px;
+      --max: 1180px;
+    }
+
+    /* Soccer-themed background (no external images): pitch lines + subtle ball pattern (SVG data URI) */
+    body{
+      margin:0;
+      color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+      background:
+        linear-gradient(rgba(8,10,20,0.72), rgba(8,10,20,0.72)),
+        url('https://wallpapers.com/images/featured/fifa-world-cup-gfr0guq1pi22nf3m.jpg') center/cover no-repeat fixed;
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+        /* overlay removed */
+        /* body::before{ */
+      content:"";
+      position:fixed; inset:0;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='800' viewBox='0 0 1200 800'%3E%3Crect width='1200' height='800' fill='%23e8f5e9'/%3E%3Cg stroke='%2394c3a5' stroke-width='3' fill='none'%3E%3Crect x='40' y='40' width='1120' height='720' rx='24'/%3E%3Cline x1='600' y1='40' x2='600' y2='760'/%3E%3Ccircle cx='600' cy='400' r='90'/%3E%3Crect x='40' y='260' width='140' height='280' rx='12'/%3E%3Crect x='1020' y='260' width='140' height='280' rx='12'/%3E%3Crect x='40' y='330' width='70' height='140' rx='10'/%3E%3Crect x='1090' y='330' width='70' height='140' rx='10'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: cover;
+      background-position: center;
+      opacity:.22;
+      pointer-events:none;
+    */
+
+    a{ color:inherit; text-decoration:none; }
+    .wrap{ max-width:var(--max); margin:0 auto; padding: 28px 18px 64px; position:relative; }
+    header{
+      display:flex; gap:16px; align-items:flex-start; justify-content:space-between;
+      margin-bottom: 18px;
+    }
+    .brand{
+      display:flex; gap:14px; align-items:center;
+    }
+    .logo{
+      width:44px; height:44px; border-radius:14px;
+      background: linear-gradient(145deg, rgba(145,70,255,.35), rgba(145,70,255,.05));
+      border: 1px solid rgba(145,70,255,.45);
+      box-shadow: var(--shadow);
+      display:grid; place-items:center;
+      backdrop-filter: blur(8px);
+    }
+    .title h1{
+      margin:0;
+      font-size: 20px;
+      letter-spacing: .2px;
+      line-height: 1.15;
+    }
+    .title p{
+      margin:6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      max-width: 64ch;
+    }
+    .pillrow{
+      display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end;
+    }
+    .pill{
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--stroke);
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 12px;
+      color: rgba(243,246,255,.86);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 18px rgba(0,0,0,.22);
+      display:flex; align-items:center; gap:8px;
+    }
+    .dot{ width:8px; height:8px; border-radius:999px; background: var(--twitch); box-shadow: 0 0 0 3px rgba(145,70,255,.18); }
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 16px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+      header{ flex-direction:column; }
+      .pillrow{ justify-content:flex-start; }
+    }
+
+    .panel{
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+    }
+    .panel .hd{
+      padding: 16px 16px 12px;
+      display:flex; justify-content:space-between; align-items:center; gap:14px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), transparent);
+    }
+    .panel .hd h2{
+      margin:0;
+      font-size: 14px;
+      letter-spacing:.25px;
+      text-transform: uppercase;
+      color: rgba(243,246,255,.92);
+    }
+    .panel .bd{ padding: 14px 16px 16px; }
+
+    /* Tabs */
+    .tabs{
+      display:flex; gap:8px; flex-wrap:wrap;
+      margin: 10px 0 0;
+    }
+    .tabbtn{
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: rgba(243,246,255,.92);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      cursor:pointer;
+      transition: transform .08s ease, background .2s ease, border .2s ease;
+      display:flex; align-items:center; gap:8px;
+      user-select:none;
+    }
+    .tabbtn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.09); }
+    .tabbtn[aria-selected="true"]{
+      background: rgba(145,70,255,.18);
+      border-color: rgba(145,70,255,.55);
+      box-shadow: 0 12px 22px rgba(145,70,255,.12);
+    }
+
+    .flag{
+      width:18px; height:12px; border-radius:3px;
+      background: linear-gradient(180deg, #ffd100 0 50%, #0033a0 50% 75%, #ce1126 75% 100%);
+      border:1px solid rgba(255,255,255,.14);
+      box-shadow: 0 0 0 3px rgba(0,0,0,.15);
+    }
+    .flag.ar{ background: linear-gradient(180deg, #74acdf 0 33%, #ffffff 33% 66%, #74acdf 66% 100%); }
+    .flag.pe{ background: linear-gradient(90deg, #d91023 0 33%, #ffffff 33% 66%, #d91023 66% 100%); }
+    .flag.cl{ background: linear-gradient(180deg, #ffffff 0 50%, #d52b1e 50% 100%); }
+    .flag.cl::before{
+      content:""; display:block; width:38%; height:50%;
+      background:#0039a6;
+      border-top-left-radius:3px;
+    }
+
+    .tabpanes{ margin-top: 12px; }
+    .tabpane{ display:none; }
+    .tabpane.active{ display:block; }
+
+    /* Package cards */
+    .cards{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+    }
+    .card{
+      grid-column: span 12;
+      background: var(--panel2);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: var(--radius2);
+      padding: 14px;
+      overflow:hidden;
+      position:relative;
+    }
+    .card::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: radial-gradient(520px 140px at 30% 0%, rgba(145,70,255,.18), transparent 60%),
+                  radial-gradient(420px 140px at 90% 20%, rgba(0,255,170,.12), transparent 55%);
+      pointer-events:none;
+      opacity:.8;
+    }
+    .card > *{ position:relative; }
+    @media (min-width: 960px){
+      .card.span4{ grid-column: span 4; }
+      .card.span6{ grid-column: span 6; }
+      .card.span12{ grid-column: span 12; }
+    }
+
+    .cardtop{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+      margin-bottom: 10px;
+    }
+    .tag{
+      display:inline-flex; align-items:center; gap:8px;
+      font-size: 12px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: rgba(243,246,255,.9);
+      white-space:nowrap;
+    }
+    .tag strong{ font-weight:700; letter-spacing:.2px; }
+    .tag.amarillo{ background: rgba(255, 209, 0, .14); border-color: rgba(255, 209, 0, .35); }
+    .tag.azul{ background: rgba(0, 79, 255, .14); border-color: rgba(0, 79, 255, .35); }
+    .tag.rojo{ background: rgba(255, 44, 44, .14); border-color: rgba(255, 44, 44, .35); }
+    .price{
+      text-align:right;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .price b{
+      display:block;
+      color: rgba(243,246,255,.96);
+      font-size: 18px;
+      letter-spacing:.2px;
+      margin-top:2px;
+    }
+
+    .meta{
+      display:flex; flex-wrap:wrap; gap:8px;
+      margin: 10px 0 12px;
+    }
+    .chip{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 7px 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      font-size: 12px;
+      color: rgba(243,246,255,.9);
+    }
+    .chip .k{ color: var(--muted); }
+    .badge{
+      display:inline-flex; align-items:center; gap:7px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+    }
+    .b-home{ border-color: rgba(145,70,255,.50); background: rgba(145,70,255,.14); }
+    .b-fito{ border-color: rgba(0,255,170,.45); background: rgba(0,255,170,.10); }
+    .b-video{ border-color: rgba(255,207,90,.50); background: rgba(255,207,90,.12); }
+    .schedule{
+      margin: 8px 0 0;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px dashed rgba(255,255,255,.18);
+      background: rgba(0,0,0,.18);
+    }
+    .schedule ul{ margin:0; padding:0; list-style:none; display:grid; gap:7px; }
+    .row{
+      display:flex; justify-content:space-between; gap:10px; align-items:flex-start;
+      font-size: 12px; color: rgba(243,246,255,.88);
+    }
+    .row span{ color: var(--muted); }
+    .row .left{ max-width: 70%; }
+    .row .right{ display:flex; gap:6px; align-items:center; white-space:nowrap; }
+    .hint{
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    /* Consultive widget */
+    .form{
+      display:grid;
+      gap: 10px;
+    }
+    .field label{
+      display:block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    select, input[type="range"]{
+      width:100%;
+    }
+    select{
+      appearance:none;
+      background: rgba(255,255,255,.06);
+      color: rgba(243,246,255,.92);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 13px;
+      outline:none;
+    }
+    input[type="range"]{
+      accent-color: var(--twitch);
+    }
+    .mini{
+      display:flex; justify-content:space-between; gap:10px;
+      font-size: 12px; color: var(--muted);
+    }
+    .reco{
+      margin-top: 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(145,70,255,.35);
+      background: linear-gradient(180deg, rgba(145,70,255,.14), rgba(0,0,0,.12));
+      padding: 12px;
+    }
+    .reco h3{ margin:0 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing:.2px; }
+    .reco p{ margin:0; font-size: 12px; color: rgba(243,246,255,.86); line-height:1.35; }
+    .reco .strong{ color: rgba(243,246,255,.96); font-weight:700; }
+
+    /* Format explorer */
+    details{
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.05);
+    }
+    details + details{ margin-top: 10px; }
+    summary{
+      cursor:pointer;
+      list-style:none;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      font-size: 13px;
+    }
+    summary::-webkit-details-marker{ display:none; }
+    .sumleft{ display:flex; align-items:center; gap:10px; }
+    .caret{
+      width:9px; height:9px;
+      border-right:2px solid rgba(243,246,255,.78);
+      border-bottom:2px solid rgba(243,246,255,.78);
+      transform: rotate(-45deg);
+      transition: transform .2s ease;
+      margin-left:6px;
+    }
+    details[open] .caret{ transform: rotate(45deg); }
+    .desc{
+      margin-top: 10px;
+      color: rgba(243,246,255,.84);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .desc ul{ margin:8px 0 0; padding-left: 18px; color: rgba(243,246,255,.8); }
+    .foot{
+      margin-top: 14px;
+      font-size: 12px;
+      color: rgba(243,246,255,.65);
+      line-height: 1.35;
+    }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.22);
+      color: rgba(243,246,255,.8);
+    }
+    .highlight{
+      outline: 2px solid rgba(255,207,90,.75);
+      box-shadow: 0 0 0 6px rgba(255,207,90,.10);
+      transition: outline .18s ease, box-shadow .18s ease;
+    }
+  
+    /* Segmented control (3 options) */
+    .seg{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:8px;
+      margin-top:6px;
+    }
+    .segbtn{
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: rgba(243,246,255,.92);
+      padding: 10px 10px;
+      border-radius: 12px;
+      font-size: 13px;
+      cursor:pointer;
+      transition: transform .08s ease, background .2s ease, border .2s ease;
+      user-select:none;
+      text-align:center;
+      font-weight:600;
+    }
+    .segbtn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.09); }
+    .segbtn[aria-selected="true"]{
+      background: rgba(145,70,255,.18);
+      border-color: rgba(145,70,255,.55);
+      box-shadow: 0 12px 22px rgba(145,70,255,.12);
+    }
+
+  
+    /* Bonificados highlight */
+    .bonos{
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(145,70,255,.28), rgba(145,70,255,.12));
+      border: 1px solid rgba(145,70,255,.55);
+      box-shadow: 0 10px 20px rgba(145,70,255,.18);
+    }
+    .bonos h4{
+      margin:0 0 6px;
+      font-size: 11px;
+      letter-spacing:.3px;
+      text-transform: uppercase;
+      color: #ffffff;
+    }
+    .bonos .chip{
+      background: rgba(255,255,255,.14);
+      border-color: rgba(255,255,255,.35);
+      font-weight:700;
+      color:#ffffff;
+    }
+
+  
+    /* Price visibility boost */
+    .price b{
+      color:#ffffff;
+      font-weight:800;
+      text-shadow: 0 2px 6px rgba(0,0,0,.45);
+    }
+    .price span{
+      color: rgba(243,246,255,.85);
+      font-weight:600;
+    }
+
+  
+    /* Colombia price badge */
+    .price-badge{
+      margin: 10px 0 6px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(255,207,90,.28), rgba(255,207,90,.12));
+      border: 1px solid rgba(255,207,90,.65);
+      box-shadow: 0 10px 22px rgba(255,207,90,.25);
+      text-align:center;
+    }
+    .price-badge span{
+      display:block;
+      font-size:12px;
+      letter-spacing:.3px;
+      text-transform:uppercase;
+      color: rgba(255,255,255,.85);
+    }
+    .price-badge b{
+      display:block;
+      margin-top:4px;
+      font-size:22px;
+      font-weight:900;
+      color:#ffffff;
+      text-shadow: 0 3px 10px rgba(0,0,0,.55);
+    }
+
+  
+    /* Fix Colombia price not showing: allow wrapping and reserve space */
+    .cardtop{ flex-wrap: wrap; }
+    .tag{ flex: 1 1 240px; }
+    .price{ flex: 0 0 auto; min-width: 190px; margin-left: auto; }
+
+  
+    /* Unified investment box */
+    .investment-box{
+      margin: 12px 0 14px;
+      padding: 16px 14px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(255,209,0,.25), rgba(145,70,255,.25));
+      border: 1px solid rgba(255,209,0,.65);
+      text-align:center;
+      box-shadow: 0 12px 24px rgba(0,0,0,.35);
+    }
+    .investment-box span{
+      display:block;
+      font-size: 11px;
+      letter-spacing:.3px;
+      opacity:.85;
+      margin-bottom:6px;
+    }
+    .investment-box strong{
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing:.4px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <!-- Simple Twitch-inspired mark (SVG) -->
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4.5 3.5h16v10.2l-4 4h-4l-2.2 2.3H8.8v-2.3H4.5V3.5Z" stroke="rgba(243,246,255,.92)" stroke-width="1.6" />
+            <path d="M7.2 6.2h12.1v6.2l-2.8 2.9h-4.1l-2 2.1v-2.1H7.2V6.2Z" fill="rgba(145,70,255,.55)"/>
+            <path d="M13.5 9.1v3.2" stroke="#0b0d12" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M16.2 9.1v3.2" stroke="#0b0d12" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="title">
+          <h1>Paquetes Mundial en Twitch — 4 países</h1>
+          <p>Oferta dinámica y consultiva para campañas de alto impacto durante el Mundial. Explora por país, compara paquetes y entiende el rol de cada formato: <b>HOME</b>, <b>FITO</b> y <b>Video Premium</b>.</p>
+        </div>
+      </div>
+
+      <div class="pillrow" aria-label="Highlights">
+        <div class="pill"><span class="dot"></span> Enfoque: momentos de alta atención (partidos + hitos)</div>
+        <div class="pill">Mix recomendado: Dominancia + continuidad + frecuencia</div>
+        <div class="pill">Bonos incluidos: <b>Home 2x1</b> + impresiones de video</div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- Left: packages with tabs -->
+      <section class="panel" aria-label="Paquetes por país">
+        <div class="hd">
+          <h2>Países & Paquetes</h2>
+          <div class="tabs" role="tablist" aria-label="Países">
+            <button class="tabbtn" role="tab" aria-selected="true" aria-controls="p-col" id="t-col">
+              <span class="flag"></span> Colombia
+            </button>
+            <button class="tabbtn" role="tab" aria-selected="false" aria-controls="p-ar" id="t-ar">
+              <span class="flag ar"></span> Argentina
+            </button>
+            <button class="tabbtn" role="tab" aria-selected="false" aria-controls="p-pe" id="t-pe">
+              <span class="flag pe"></span> Perú
+            </button>
+            <button class="tabbtn" role="tab" aria-selected="false" aria-controls="p-cl" id="t-cl">
+              <span class="flag cl"></span> Chile
+            </button>
+          </div>
+        </div>
+
+        <div class="bd">
+          <div class="tabpanes">
+            <!-- Colombia -->
+            <div class="tabpane active" id="p-col" role="tabpanel" aria-labelledby="t-col">
+              <div class="cards">
+                <article class="card span4" data-country="Colombia" data-package="Amarillo">
+                  <div class="cardtop">
+                    <div class="tag amarillo"><strong>PAQUETE Amarillo</strong> · Colombia</div>
+                  <div class="price-badge">
+                    <span>Inversión</span>
+                    <b>$100.000.000 COP</b>
+                  </div>
+
+                    
+                  </div>
+
+                  <div class="meta">
+                    <span class="badge b-home">HOME × 5</span>
+                    <span class="badge b-fito">FITO × 3</span>
+                    <span class="badge b-video">VIDEO × 1</span>
+                  </div>
+                  <div class="bonos">
+                    <h4>Bonificados</h4>
+                    <div class="meta">
+                      <div class="chip">🎁 Video <b>500.000 imp</b></div>
+                      <div class="chip">🎁 Home <b>2x1</b></div>
+                    </div>
+                  </div>
+
+                  <div class="schedule" aria-label="Fechas y formatos">
+                    <ul>
+                      <li class="row"><div class="left">Inauguración <span>11 de junio</span></div><div class="right"><span class="badge b-fito">FITO</span></div></li>
+                      <li class="row"><div class="left">Colombia vs Uzbekistan</div><div class="right"><span class="badge b-home">HOME</span></div></li>
+                      <li class="row"><div class="left">Colombia vs Portugal</div><div class="right"><span class="badge b-home">HOME</span></div></li>
+                      <li class="row"><div class="left">Final <span>19 de julio</span></div><div class="right"><span class="badge b-home">HOME</span></div></li>
+                      <li class="row"><div class="left">Fecha por definir</div><div class="right"><span class="badge b-home">HOME</span></div></li>
+                      <li class="row"><div class="left">Fecha por definir</div><div class="right"><span class="badge b-fito">FITO</span></div></li>
+                      <li class="row"><div class="left">Fecha por definir</div><div class="right"><span class="badge b-home">HOME</span></div></li>
+                      <li class="row"><div class="left">Fecha por definir</div><div class="right"><span class="badge b-fito">FITO</span></div></li>
+                      <li class="row"><div class="left">VIDEO</div><div class="right"><span class="badge b-video">VIDEO</span></div></li>
+                    </ul>
+                  </div>
+
+                  <p class="hint"><b>Rol estratégico:</b> máxima dominancia visual en HOME (picos), con FITO para sostener conversación y video para continuidad en semana.</p>
+                </article>
+
+                <article class="card span4" data-country="Colombia" data-package="Azul">
+                  <div class="cardtop">
+                    <div class="tag azul"><strong>PAQUETE Azul</strong> · Colombia</div>
+                  <div class="price-badge">
+                    <span>Inversión</span>
+                    <b>$70.000.000 COP</b>
+                  </div>
+
+                    
+                  </div>
+
+                  <div class="meta">
+                    <span class="badge b-home">HOME × 3</span>
+                    <span class="badge b-fito">FITO × 2</span>
+                    <span class="badge b-video">VIDEO × 1</span>
+                  </div>
+                  <div class="bonos">
+                    <h4>Bonificados</h4>
+                    <div class="meta">
+                      <div class="chip">🎁 Video <b>400.000 imp</b></div>
+                      <div class="chip">🎁 Home <b>2x1</b></div>
+                    </div>
+                  </div>
+
+                  <div class="schedule" aria-label="Fechas y formatos">
+                    <ul>
+                      <li class="row"><div class="left">Inauguración <span>11 de junio</span></div><div class="right"><span class="badge b-home">HOME</span></div></li>
+                      <li class="row"><div class="left">Colombia vs Por definir</div><div class="right"><span class="badge b-home">HOME</span></div></li>
+                      <li class="row"><div class="left">Final <span>19 de julio</span></div><div class="right"><span class="badge b-fito">FITO</span></div></li>
+                      <li class="row"><div class="left">Fecha por definir</div><div class="right"><span class="badge b-home">HOME</span></div></li>
+                      <li class="row"><div class="left">Fecha por definir</div><div class="right"><span class="badge b-fito">FITO</span></div></li>
+                      <li class="row"><div class="left">VIDEO</div><div class="right"><span class="badge b-video">VIDEO</span></div></li>
+                    </ul>
+                  </div>
+
+                  <p class="hint"><b>Rol estratégico:</b> equilibrio entre dominancia (HOME) y empuje táctico (FITO) con una capa de video para reach incremental.</p>
+                </article>
+
+                <article class="card span4" data-country="Colombia" data-package="Rojo">
+                  <div class="cardtop">
+                    <div class="tag rojo"><strong>PAQUETE Rojo</strong> · Colombia</div>
+                  <div class="price-badge">
+                    <span>Inversión</span>
+                    <b>$75.000.000 COP</b>
+                  </div>
+
+                    
+                  </div>
+
+                  <div class="meta">
+                    <span class="badge b-home">HOME × 3</span>
+                    <span class="badge b-fito">FITO × 3</span>
+                    <span class="badge b-video">VIDEO × 1</span>
+                  </div>
+                  <div class="bonos">
+                    <h4>Bonificados</h4>
+                    <div class="meta">
+                      <div class="chip">🎁 Video <b>450.000 imp</b></div>
+                      <div class="chip">🎁 Home <b>2x1</b></div>
+                    </div>
+                  </div>
+
+                  <div class="schedule" aria-label="Fechas y formatos">
+                    <ul>
+                      <li class="row"><div class="left">Fecha por definir <span>x3</span></div><div class="right"><span class="badge b-fito">FITO</span></div></li>
+                      <li class="row"><div class="left">Fecha por definir <span>x3</span></div><div class="right"><span class="badge b-home">HOME</span></div></li>
+                      <li class="row"><div class="left">VIDEO</div><div class="right"><span class="badge b-video">VIDEO</span></div></li>
+                    </ul>
+                  </div>
+
+                  <p class="hint"><b>Rol estratégico:</b> paquete flexible para “fechas definibles” (partidos, fases o hitos). Ideal para ajustar a calendario final.</p>
+                </article>
+              </div>
+            </div>
+
+            <!-- Argentina -->
+            <div class="tabpane" id="p-ar" role="tabpanel" aria-labelledby="t-ar">
+              <div class="cards">
+                <article class="card span12" data-country="Argentina" data-package="Mundial">
+                  <div class="cardtop">
+                    <div class="tag"><strong>PAQUETE Mundial</strong> · Argentina</div>
+                  <div class="investment-box">
+                    <span>INVERSIÓN</span>
+                    <strong>$60.000 USD</strong>
+                  </div>
+                    
+                  </div>
+
+                  <div class="meta">
+                    <span class="badge b-home">HOME × 3</span>
+                    <span class="badge b-fito">FITO × 3</span>
+                    <span class="badge b-video">VIDEO × 1</span>
+                  </div>
+                  <div class="bonos">
+                    <h4>Bonificados</h4>
+                    <div class="meta">
+                      <div class="chip">🎁 Video <b>450.000 imp</b></div>
+                      <div class="chip">🎁 Home <b>2x1</b></div>
+                    </div>
+                  </div>
+
+                  <div class="schedule">
+                    <ul>
+                      <li class="row"><div class="left">Fecha por definir <span>x3</span></div><div class="right"><span class="badge b-fito">FITO</span></div></li>
+                      <li class="row"><div class="left">Fecha por definir <span>x3</span></div><div class="right"><span class="badge b-home">HOME</span></div></li>
+                      <li class="row"><div class="left">VIDEO</div><div class="right"><span class="badge b-video">VIDEO</span></div></li>
+                    </ul>
+                  </div>
+
+                  <p class="hint"><b>Rol estratégico:</b> cubrir picos (HOME), reforzar intención/acción en días clave (FITO) y sostener presencia (video).</p>
+                </article>
+              </div>
+            </div>
+
+            <!-- Perú -->
+            <div class="tabpane" id="p-pe" role="tabpanel" aria-labelledby="t-pe">
+              <div class="cards">
+                <article class="card span12" data-country="Perú" data-package="Mundial">
+                  <div class="cardtop">
+                    <div class="tag"><strong>PAQUETE Mundial</strong> · Perú</div>
+                  <div class="investment-box">
+                    <span>INVERSIÓN</span>
+                    <strong>$30.000 USD</strong>
+                  </div>
+                    
+                  </div>
+
+                  <div class="meta">
+                    <span class="badge b-home">HOME × 3</span>
+                    <span class="badge b-fito">FITO × 3</span>
+                    <span class="badge b-video">VIDEO × 1</span>
+                  </div>
+                  <div class="bonos">
+                    <h4>Bonificados</h4>
+                    <div class="meta">
+                      <div class="chip">🎁 Video <b>350.000 imp</b></div>
+                      <div class="chip">🎁 Home <b>2x1</b></div>
+                    </div>
+                  </div>
+
+                  <div class="schedule">
+                    <ul>
+                      <li class="row"><div class="left">Fecha por definir <span>x3</span></div><div class="right"><span class="badge b-fito">FITO</span></div></li>
+                      <li class="row"><div class="left">Fecha por definir <span>x3</span></div><div class="right"><span class="badge b-home">HOME</span></div></li>
+                      <li class="row"><div class="left">VIDEO</div><div class="right"><span class="badge b-video">VIDEO</span></div></li>
+                    </ul>
+                  </div>
+
+                  <p class="hint"><b>Rol estratégico:</b> paquete estándar para planificar alrededor de fechas confirmadas (partidos, fases o activaciones de marca).</p>
+                </article>
+              </div>
+            </div>
+
+            <!-- Chile -->
+            <div class="tabpane" id="p-cl" role="tabpanel" aria-labelledby="t-cl">
+              <div class="cards">
+                <article class="card span12" data-country="Chile" data-package="Mundial">
+                  <div class="cardtop">
+                    <div class="tag"><strong>PAQUETE Mundial</strong> · Chile</div>
+                  <div class="investment-box">
+                    <span>INVERSIÓN</span>
+                    <strong>$35.000 USD</strong>
+                  </div>
+                    
+                  </div>
+
+                  <div class="meta">
+                    <span class="badge b-home">HOME × 3</span>
+                    <span class="badge b-fito">FITO × 3</span>
+                    <span class="badge b-video">VIDEO × 1</span>
+                  </div>
+                  <div class="bonos">
+                    <h4>Bonificados</h4>
+                    <div class="meta">
+                      <div class="chip">🎁 Video <b>350.000 imp</b></div>
+                      <div class="chip">🎁 Home <b>2x1</b></div>
+                    </div>
+                  </div>
+
+                  <div class="schedule">
+                    <ul>
+                      <li class="row"><div class="left">Fecha por definir <span>x3</span></div><div class="right"><span class="badge b-fito">FITO</span></div></li>
+                      <li class="row"><div class="left">Fecha por definir <span>x3</span></div><div class="right"><span class="badge b-home">HOME</span></div></li>
+                      <li class="row"><div class="left">VIDEO</div><div class="right"><span class="badge b-video">VIDEO</span></div></li>
+                    </ul>
+                  </div>
+
+                  <p class="hint"><b>Rol estratégico:</b> el mix “3+3+1” permite combinar momentos pico y continuidad sin perder cobertura.</p>
+                </article>
+              </div>
+            </div>
+          </div>
+
+          <div class="foot">
+            Tip rápido: usa <span class="kbd">Tab</span> para moverte por pestañas y <span class="kbd">Enter</span> para abrir los detalles de formatos.
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: consultive module + format explorer -->
+      <aside class="panel" aria-label="Módulo consultivo">
+        <div class="hd">
+          <h2>Modo consultivo</h2>
+          <div class="pill" title="Heurística simple para recomendar el paquete más alineado al objetivo">Recomendador</div>
+        </div>
+        <div class="bd">
+          
+          <div class="form">
+            <div class="field">
+              <label>Selecciona el enfoque (3 opciones)</label>
+              <div class="seg" role="tablist" aria-label="Enfoques">
+                <button class="segbtn" role="tab" aria-selected="true" data-mode="dominancia">Dominancia</button>
+                <button class="segbtn" role="tab" aria-selected="false" data-mode="balance">Balance</button>
+                <button class="segbtn" role="tab" aria-selected="false" data-mode="eficiencia">Eficiencia</button>
+              </div>
+              <div class="mini"><span>Más impacto</span><span>Más equilibrio</span><span>Más costo-eficiente</span></div>
+            </div>
+
+            <div class="reco" id="reco">
+              <h3>Sugerencia</h3>
+              <p>Elige una opción para ver el paquete recomendado y el porqué.</p>
+            </div>
+          </div>
+
+
+          <div style="height:12px"></div>
+
+          <div class="panel" style="box-shadow:none; background:transparent; border:none; padding:0;">
+            <div class="hd" style="padding:0 0 10px; border:none; background:transparent;">
+              <h2>Formatos en Twitch</h2>
+            </div>
+            <div class="bd" style="padding:0;">
+              <details>
+                <summary>
+                  <span class="sumleft"><span class="badge b-home">HOME</span> Homepage Headliner</span>
+                  <span class="caret" aria-hidden="true"></span>
+                </summary>
+                <div class="desc">
+                  <b>Qué es:</b> formato de máxima visibilidad para dominar el día (perfecto para inauguración, partidos clave y finales).
+                  <ul>
+                    <li><b>Uso en Mundial:</b> “takeover” para ganar share of voice cuando la audiencia está en modo evento.</li>
+                    <li><b>Rol en el mix:</b> picos de atención → recordación y asociación inmediata con el momento.</li>
+                    <li><b>Tip creativo:</b> copy corto + visual fuerte + un “ancla” del evento (fecha/fase/selección).</li>
+                  </ul>
+                </div>
+              </details>
+
+              <details>
+                <summary>
+                  <span class="sumleft"><span class="badge b-fito">FITO</span> First Impression Takeover (FITO)</span>
+                  <span class="caret" aria-hidden="true"></span>
+                </summary>
+                <div class="desc">
+                  <b>Qué es:</b> entrada contundente para capturar “primer impacto” dentro del journey del usuario.
+                  <ul>
+                    <li><b>Uso en Mundial:</b> activar en días “por definir” para acompañar fases, clasificaciones, previa/post, watch parties.</li>
+                    <li><b>Rol en el mix:</b> empuje táctico → refuerza intención, conversación y contexto alrededor del partido.</li>
+                    <li><b>Tip creativo:</b> pregunta/insight (ej. “¿quién gana hoy?”) + CTA suave (“míralo con nosotros”).</li>
+                  </ul>
+                </div>
+              </details>
+
+              <details>
+                <summary>
+                  <span class="sumleft"><span class="badge b-video">VIDEO</span> Video Premium</span>
+                  <span class="caret" aria-hidden="true"></span>
+                </summary>
+                <div class="desc">
+                  <b>Qué es:</b> continuidad y frecuencia para sostener mensaje a lo largo del torneo.
+                  <ul>
+                    <li><b>Uso en Mundial:</b> “always-on” entre hitos para mantener presencia y sumar cobertura incremental.</li>
+                    <li><b>Rol en el mix:</b> consistencia → construye hábito y refuerza el recuerdo entre picos.</li>
+                    <li><b>Tip creativo:</b> 6–15s, branding temprano, cierre con “momento” (fase/fecha/beneficio).</li>
+                  </ul>
+                </div>
+              </details>
+
+              <p class="foot">
+                ¿Por qué Twitch en Mundial? La plataforma captura atención en <b>tiempo real</b> (streaming + chat), habilita <b>comunidad</b>
+                (watch parties, reacciones) y potencia el “segundo screen” que acompaña el evento. Resultado: mensajes que no solo se ven, sino que
+                se comentan y se comparten dentro del ecosistema.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  
+  <script>
+    // Tabs
+    const tabBtns = [...document.querySelectorAll(".tabbtn")];
+    const panes = [...document.querySelectorAll(".tabpane")];
+
+    const tabCountryMap = { "t-col":"Colombia", "t-ar":"Argentina", "t-pe":"Perú", "t-cl":"Chile" };
+    tabBtns.forEach(btn => { if(tabCountryMap[btn.id]) btn.dataset.country = tabCountryMap[btn.id]; });
+
+    function setActiveTab(btn){
+      tabBtns.forEach(b => b.setAttribute("aria-selected","false"));
+      btn.setAttribute("aria-selected","true");
+      panes.forEach(p => p.classList.remove("active"));
+      document.getElementById(btn.getAttribute("aria-controls")).classList.add("active");
+      clearHighlights();
+      // keep current mode selection, just recompute
+      updateReco(currentMode());
+    }
+    tabBtns.forEach(btn => btn.addEventListener("click", () => setActiveTab(btn)));
+
+    // 3-option consultive bar
+    const segBtns = [...document.querySelectorAll(".segbtn")];
+    const recoEl = document.getElementById("reco");
+
+    function currentMode(){
+      const active = segBtns.find(b => b.getAttribute("aria-selected")==="true");
+      return active?.dataset.mode || "dominancia";
+    }
+
+    function setMode(modeBtn){
+      segBtns.forEach(b => b.setAttribute("aria-selected","false"));
+      modeBtn.setAttribute("aria-selected","true");
+      clearHighlights();
+      updateReco(modeBtn.dataset.mode);
+    }
+    segBtns.forEach(btn => btn.addEventListener("click", () => setMode(btn)));
+
+    function activeCountry(){
+      const activeBtn = tabBtns.find(b => b.getAttribute("aria-selected")==="true");
+      return activeBtn?.dataset.country || (activeBtn?.textContent || "").trim();
+    }
+
+    function clearHighlights(){
+      document.querySelectorAll(".card").forEach(c => c.classList.remove("highlight"));
+    }
+
+    // Recommendation map: 3 options -> package per country
+    const recoMap = {
+      "Colombia": {
+        dominancia: {pkg:"Amarillo", why:"Más <b>HOME</b> (dominancia en días pico) + capa táctica de <b>FITO</b> y continuidad con <b>VIDEO</b>. Ideal para inauguración/partidos clave/final."},
+        balance:    {pkg:"Rojo",     why:"Mix flexible (3 HOME + 3 FITO + VIDEO) para acomodar calendario final. Balancea picos y empuje táctico sin perder continuidad."},
+        eficiencia: {pkg:"Azul",     why:"Mejor punto de entrada: mantiene picos con <b>HOME</b>, suma <b>FITO</b> para empuje y conserva <b>VIDEO</b> para reach incremental con menor inversión."}
+      },
+      "Argentina": {
+        dominancia: {pkg:"Mundial",  why:"Unifica picos con <b>HOME</b> + empuje con <b>FITO</b> + continuidad en <b>VIDEO</b>. Recomendado si buscas presencia fuerte en momentos de alta atención."},
+        balance:    {pkg:"Mundial",  why:"Mix estándar “3+3+1”: cubre momentos clave y sostiene mensaje entre hitos. Ideal para plan consistente durante el torneo."},
+        eficiencia: {pkg:"Mundial",  why:"Con un solo paquete disponible, la eficiencia viene de cómo calendarizas: concentra HOME/FITO en hitos y usa VIDEO para frecuencia sin sobreinvertir fuera de picos."}
+      },
+      "Perú": {
+        dominancia: {pkg:"Mundial",  why:"Activa <b>HOME</b> en días pico (partidos/hitos) y usa <b>FITO</b> para empuje contextual. VIDEO sostiene presencia entre fechas."},
+        balance:    {pkg:"Mundial",  why:"Estrategia ordenada para torneo: picos + táctico + continuidad. Muy útil cuando el calendario final aún está por definirse."},
+        eficiencia: {pkg:"Mundial",  why:"Optimiza inversión priorizando HOME/FITO solo en hitos y dejando VIDEO como capa de frecuencia. Así maximizas resultados con presupuesto controlado."}
+      },
+      "Chile": {
+        dominancia: {pkg:"Mundial",  why:"Recomendado si quieres ‘dominar’ días clave: HOME para visibilidad masiva, FITO para empuje y VIDEO para sostener presencia."},
+        balance:    {pkg:"Mundial",  why:"Cobertura completa del journey: awareness (HOME) + interés (FITO) + recordación (VIDEO). Un mix sólido para torneo."},
+        eficiencia: {pkg:"Mundial",  why:"Eficiencia por calendario: concentra formatos high-impact en días con audiencia alta y usa VIDEO para frecuencia sin inflar costos fuera de picos."}
+      }
+    };
+
+    function highlightPackage(pkgName){
+      const pane = panes.find(p => p.classList.contains("active"));
+      if(!pane) return null;
+      const cards = [...pane.querySelectorAll(".card")];
+      const card = cards.find(c => (c.dataset.package || "").trim() === pkgName);
+      if(card) card.classList.add("highlight");
+      return card;
+    }
+
+    function updateReco(mode){
+      const country = activeCountry();
+      const entry = recoMap[country]?.[mode];
+
+      if(!entry){
+        recoEl.querySelector("p").innerHTML = "No hay recomendación configurada para este país.";
+        return;
+      }
+
+      // highlight
+      const card = highlightPackage(entry.pkg);
+
+      const modeLabel = ({dominancia:"Dominancia", balance:"Balance", eficiencia:"Eficiencia"})[mode] || mode;
+      recoEl.querySelector("p").innerHTML =
+        `En <span class="strong">${country}</span>, para <span class="strong">${modeLabel}</span> te sugerimos: ` +
+        `<span class="strong">${entry.pkg}</span>.<br><br>` +
+        `${entry.why}` +
+        (card ? "" : "<br><br><i>(Nota: no pude resaltar la tarjeta automáticamente; revisa que el paquete exista en la pestaña.)</i>");
+    }
+
+    // Init
+    updateReco(currentMode());
+  </script>
+
+</body>
+</html>
